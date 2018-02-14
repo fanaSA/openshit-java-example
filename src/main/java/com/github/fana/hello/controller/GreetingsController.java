@@ -21,6 +21,6 @@ public class GreetingsController {
     }
 
     private String greetWithName(String name){
-        return "Hello, " + name + "!";
+        return "Eita, " + name + "!";
     }
 }

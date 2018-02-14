@@ -21,7 +21,6 @@ objects:
     labels:
       application: ${APPLICATION_NAME}
       build: ${APPLICATION_NAME}
-    namespace: ${IMAGE_STREAM_NAMESPACE}
   spec:
     output:
       to:
@@ -35,7 +34,6 @@ objects:
         from:
           kind: ImageStreamTag
           name: 'redhat-openjdk18-openshift:1.2'
-          namespace: ${IMAGE_STREAM_NAMESPACE}
       type: Source
     triggers:
     - type: ConfigChange
@@ -47,64 +45,26 @@ objects:
       application: ${APPLICATION_NAME}
   spec:
     replicas: 1
-    selector:
-      deploymentconfig: ${APPLICATION_NAME}
     strategy:
       resources: {}
       type: Rolling
     template:
       metadata:
         labels:
-          application: ${APPLICATION_NAME}
-          deploymentconfig: ${APPLICATION_NAME}
-        name: ${APPLICATION_NAME}
+          name: ${APPLICATION_NAME}
       spec:
         containers:
-        - image: jaegertracing/jaeger-agent
-          name: jaeger-agent
-          ports:
-          - containerPort: 5775
-            protocol: UDP
-          - containerPort: 5778
-          - containerPort: 6831
-            protocol: UDP
-          - containerPort: 6832
-            protocol: UDP
-          command:
-          - "/go/bin/agent-linux"
-          - "--collector.host-port=jaeger-collector:14267"
-        - env:
-          - name: SPRING_PROFILES_ACTIVE
-            value: ${SPRING_PROFILES_ACTIVE}
-          - name: JAVA_OPTS
-            value: -Duser.timezone=Africa/Johannesburg
+          - env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: ${SPRING_PROFILES_ACTIVE}
+            - name: JAVA_OPTS
+              value: -Duser.timezone=Africa/Johannesburg
           image: ${APPLICATION_NAME}
-          imagePullPolicy: Always
-          livenessProbe:
-            failureThreshold: 5
-            httpGet:
-              path: /health
-              port: 8080
-              scheme: HTTP
-            initialDelaySeconds: 120
-            periodSeconds: 60
-            successThreshold: 1
-            timeoutSeconds: 60
           name: ${APPLICATION_NAME}
           ports:
           - containerPort: 8080
             name: http
             protocol: TCP
-          readinessProbe:
-            failureThreshold: 10
-            httpGet:
-              path: /health
-              port: 8080
-              scheme: HTTP
-            initialDelaySeconds: 60
-            periodSeconds: 30
-            successThreshold: 1
-            timeoutSeconds: 30
           resources:
             limits:
               memory: 1Gi
@@ -145,12 +105,7 @@ parameters:
 - displayName: Application name
   name: APPLICATION_NAME
   required: true
-  value: content-service
-- displayName: ImageStream Namespace
-  description: Namespace in which the ImageStreams for Red Hat OpenJDK image is installed. These ImageStreams are normally installed in the openshift namespace. You should only need to modify this if you've installed the ImageStreams in a different namespace/project.
-  name: IMAGE_STREAM_NAMESPACE
-  required: true
-  value: cellc-digital-online-testing
+  value: greet-service
 - displayName: Active Spring profiles
   name: SPRING_PROFILES_ACTIVE
   value: test
